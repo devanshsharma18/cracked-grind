@@ -12,4 +12,14 @@ func hasDuplicate(nums []int) bool {
 	return false
 }
 
-//Optimised using Hash-Set
+// Optimised using Hash-Set
+func hasDuplicate2(nums []int) bool {
+	seen := make(map[int]bool)
+	for _, num := range nums {
+		if seen[num] {
+			return true
+		}
+		seen[num] = true
+	}
+	return false
+}
