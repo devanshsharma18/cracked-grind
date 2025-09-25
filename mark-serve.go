@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"log"
@@ -11,24 +12,21 @@ import (
 type ServerConfig struct {
 	port             int
 	markdownFilePath string
-	markdown         os.File
 }
 
 func main() {
 	// TODO (Step 2): Use the `flag` package to parse command-line arguments.
 	// We need a flag for the port number (e.g., `-port=8080`)
 	// and a flag for the markdown file path (e.g., `-file=README.md`).
-	// For now, we'll hardcode them.
 	var serverConfig ServerConfig
-	flag.IntVar(&serverConfig.port, "-port", 8080, "Server port")
-	flag.StringVar(&serverConfig.markdownFilePath, "-file", "markdown", "Markdown File")
-	//markdownFilePath := "test.md" // Create a simple test.md file to start.
-
+	flag.IntVar(&serverConfig.port, "port", 8080, "Server port")
+	flag.StringVar(&serverConfig.markdownFilePath, "file", "test.md", "File name")
+	flag.Parse()
 	// A basic check to see if the file exists.
-	if _, err := os.Stat(markdownFilePath); os.IsNotExist(err) {
-		log.Fatalf("File %s does not exist.", markdownFilePath)
+	if _, err := os.Open(serverConfig.markdownFilePath); os.IsNotExist(err) {
+		log.Fatalf("File %s does not exist.", "markdownFilePath")
 	}
-
+	defer file.Close()
 	// Create a new HTTP server multiplexer (router).
 	mux := http.NewServeMux()
 
@@ -37,7 +35,8 @@ func main() {
 		log.Printf("Request from %s for %s", r.RemoteAddr, r.URL.Path)
 		// TODO (Step 3): Read the content of `markdownFilePath`.
 		// Handle potential errors.
-
+		scanner := bufio.NewReader(serverConfig.markdownFilePath)
+		os.OpenFile(serverConfig.markdownFilePath)
 		// TODO (Step 4): Convert the markdown content to HTML.
 		// This is where you will use the `gomarkdown/markdown` library.
 		// Research how to use the `mdtopdf.MarkdownToHTML` function.
