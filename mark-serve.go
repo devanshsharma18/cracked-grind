@@ -1,12 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
+	"github.com/gomarkdown/markdown"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 type ServerConfig struct {
@@ -15,31 +16,50 @@ type ServerConfig struct {
 }
 
 func main() {
-	// TODO (Step 2): Use the `flag` package to parse command-line arguments.
-	// We need a flag for the port number (e.g., `-port=8080`)
-	// and a flag for the markdown file path (e.g., `-file=README.md`).
+
+	//Define and parse the command-line flags required to configure the server on startup
+	//This allows user to specify the port number and markdown file to the serve.
 	var serverConfig ServerConfig
 	flag.IntVar(&serverConfig.port, "port", 8080, "Server port")
 	flag.StringVar(&serverConfig.markdownFilePath, "file", "test.md", "File name")
 	flag.Parse()
-	// A basic check to see if the file exists.
-	if _, err := os.Open(serverConfig.markdownFilePath); os.IsNotExist(err) {
-		log.Fatalf("File %s does not exist.", "markdownFilePath")
+
+	//Before starting the server, we check if the target file exists and can be accessed.
+	// In case the file does not exist or cannot be opened, we exit with errors
+	file, err := os.Open(serverConfig.markdownFilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+
+			// If the file does not exist, log a "Does not exist" message.
+			log.Fatalf("File '%s' does not exist.", serverConfig.markdownFilePath)
+		}
+		//Handle all other potential errors (e.g., permission denied).
+		log.Fatalf("An unexpected error occurred while opening file: %v", err)
 	}
+	//Deferring the file closure to the final steps of the program
 	defer file.Close()
+
 	// Create a new HTTP server multiplexer (router).
 	mux := http.NewServeMux()
 
 	// This is the main handler for rendering the markdown file.
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Request from %s for %s", r.RemoteAddr, r.URL.Path)
-		// TODO (Step 3): Read the content of `markdownFilePath`.
-		// Handle potential errors.
-		scanner := bufio.NewReader(serverConfig.markdownFilePath)
-		os.OpenFile(serverConfig.markdownFilePath)
-		// TODO (Step 4): Convert the markdown content to HTML.
-		// This is where you will use the `gomarkdown/markdown` library.
-		// Research how to use the `mdtopdf.MarkdownToHTML` function.
+
+		//Reading the contents of the file submitted by the user.
+		// Handling potential errors where the file is not accessible.
+		content, err := os.ReadFile(serverConfig.markdownFilePath)
+
+		if err != nil {
+			log.Printf("ERROR: could not read file %s: %v", serverConfig.markdownFilePath, err)
+			// Sending a user an error message on the browser level.
+			http.Error(w, "500 Internal Server Error: Could not read file.", http.StatusInternalServerError)
+			return
+		}
+
+		// Convert the raw markdown bytes into HTML bytes using the markdown library's default settings.
+		html := markdown.ToHTML(content, nil, nil)
+		w.Write(html)
 
 		// TODO (Step 5): Inject the generated HTML into our `template.html`.
 		// You will need to read `template.html` and replace a placeholder
@@ -57,7 +77,7 @@ func main() {
 	// This is a major step, so break it down!
 
 	srv := &http.Server{
-		Addr:    ":" + port,
+		Addr:    ":" + strconv.Itoa(serverConfig.port),
 		Handler: mux,
 	}
 
@@ -70,9 +90,9 @@ func main() {
 	// 4. When the signal is received, send a "reload" message to all connected
 	//    WebSocket clients.
 
-	log.Printf("Starting server on http://localhost:%s", port)
+	log.Printf("Starting server on http://localhost:%s", strconv.Itoa(serverConfig.port))
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("Could not listen on %s: %v\n", port, err)
+		log.Fatalf("Could not listen on %s: %v\n", strconv.Itoa(serverConfig.port), err)
 	}
 
 	// TODO (Step 8): Implement Graceful Shutdown.

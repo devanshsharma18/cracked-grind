@@ -1,0 +1,4 @@
+github.com/gomarkdown/markdown v0.0.0-20250810172220-2e2c11897d1a h1:l7A0loSszR5zHd/qK53ZIHMO8b3bBSmENnQ6eKnUT0A=
+github.com/gomarkdown/markdown v0.0.0-20250810172220-2e2c11897d1a/go.mod h1:JDGcbDT52eL4fju3sZ4TeHGsQwhG9nbDV21aMyhwPoA=
+github.com/gomarkdown/mdtohtml v0.0.0-20240124153210-d773061d1585 h1:gfB9CukKWjBI83xByTJwpOkSwFD+Ev+2m3U332KZCLo=
+github.com/gomarkdown/mdtohtml v0.0.0-20240124153210-d773061d1585/go.mod h1:6grYm5/uY15CwgBBqwA3+o/cAzaxssckznJ0B35ouBY=
